@@ -169,9 +169,14 @@
 </div>
 
 <div class="content">
-    <h3 class="page-title"><i class="fas fa-user-graduate"></i> Select Student to View Records</h3>
-    
-    <div class="student-grid">
+<h3 class="page-title"><i class="fas fa-user-graduate"></i> Select Student to View Records</h3>
+
+<div style="margin-bottom: 20px;">
+    <input type="text" id="searchInput" placeholder="🔍 Search by name or IC..." 
+           style="width: 100%; padding: 12px 18px; border: 2px solid #e8e0d8; border-radius: 12px; font-size: 14px; font-family: 'Poppins', sans-serif;">
+</div>
+
+<div class="student-grid" id="studentGrid">
         <% if (students.length === 0) { %>
             <div style="width:100%; text-align:center; padding:60px; color:#ccc;">
                 <i class="fas fa-user-slash" style="font-size:60px;"></i>
@@ -197,5 +202,14 @@
     <p><strong>Digital Duty Record System</strong></p>
 </div>
 
+<script>
+document.getElementById('searchInput').addEventListener('input', function() {
+    var search = this.value.toLowerCase();
+    document.querySelectorAll('.student-card').forEach(function(card) {
+        var text = card.textContent.toLowerCase();
+        card.style.display = text.includes(search) ? '' : 'none';
+    });
+});
+</script>
 </body>
 </html>
