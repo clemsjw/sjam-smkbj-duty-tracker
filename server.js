@@ -22,7 +22,7 @@ async function initDB() {
   
   db.run(`
     CREATE TABLE IF NOT EXISTS users (
-      ic_number TEXT PRIMARY KEY NOT NULL,
+      nombor_daftar TEXT PRIMARY KEY NOT NULL,
       full_name TEXT NOT NULL,
       role TEXT DEFAULT 'student',
       class TEXT,
@@ -33,7 +33,7 @@ async function initDB() {
   db.run(`
     CREATE TABLE IF NOT EXISTS duties (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      user_ic TEXT NOT NULL,
+      nombor_daftar TEXT NOT NULL,
       event_name TEXT NOT NULL,
       start_time DATETIME NOT NULL,
       end_time DATETIME NOT NULL,
@@ -80,17 +80,17 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 passport.use(new LocalStrategy({
-  usernameField: 'ic_number',
-  passwordField: 'ic_number'
-}, (ic_number, password, done) => {
-  const users = query('SELECT * FROM users WHERE ic_number = ?', [ic_number]);
+  usernameField: 'nombor_daftar',
+  passwordField: 'nombor_daftar'
+}, (nombor_daftar, password, done) => {
+  const users = query('SELECT * FROM users WHERE nombor_daftar = ?', [nombor_daftar]);
   if (users.length === 0) return done(null, false);
   return done(null, users[0]);
 }));
 
-passport.serializeUser((user, done) => done(null, user.ic_number));
-passport.deserializeUser((ic_number, done) => {
-  const users = query('SELECT * FROM users WHERE ic_number = ?', [ic_number]);
+passport.serializeUser((user, done) => done(null, user.nombor_daftar));
+passport.deserializeUser((nombor_daftar, done) => {
+  const users = query('SELECT * FROM users WHERE nombor_daftar = ?', [nombor_daftar]);
   done(null, users[0] || null);
 });
 
@@ -105,7 +105,7 @@ function checkAuth(req, res, next) {
 }
 
 app.get('/dashboard', checkAuth, (req, res) => {
-  const duties = query('SELECT * FROM duties WHERE user_ic = ? ORDER BY created_at DESC', [req.user.ic_number]);
+  const duties = query('SELECT * FROM duties WHERE nombor_daftar = ? ORDER BY created_at DESC', [req.user.nombor_daftar]);
   res.render('dashboard', { user: req.user, duties: duties });
 });
 
@@ -114,7 +114,7 @@ app.post('/add-duty', checkAuth, (req, res) => {
   const start = new Date(start_time);
   const end = new Date(end_time);
   const hours = (end - start) / (1000 * 60 * 60);
-  run('INSERT INTO duties (user_ic, event_name, start_time, end_time, hours) VALUES (?, ?, ?, ?, ?)', [req.user.ic_number, event_name, start_time.toISOString(), end_time.toISOString(), hours]);
+  run('INSERT INTO duties (nombor_daftar, event_name, start_time, end_time, hours) VALUES (?, ?, ?, ?, ?)', [req.user.nombor_daftar, event_name, start_time.toISOString(), end_time.toISOString(), hours]);
   res.redirect('/dashboard');
 });
 
@@ -126,7 +126,7 @@ app.post('/update-status/:id', checkAuth, (req, res) => {
 
 app.get('/admin', checkAuth, (req, res) => {
   if (req.user.role !== 'admin') return res.redirect('/dashboard');
-  const records = query('SELECT d.*, u.full_name, u.class FROM duties d JOIN users u ON d.user_ic = u.ic_number ORDER BY d.created_at DESC');
+  const records = query('SELECT d.*, u.full_name, u.class FROM duties d JOIN users u ON d.nombor_daftar = u.nombor_daftar ORDER BY d.created_at DESC');
   res.render('admin', { user: req.user, records: records });
 });
 
@@ -136,11 +136,11 @@ app.get('/admin/students', checkAuth, (req, res) => {
   res.render('admin-students', { user: req.user, students: students });
 });
 
-app.get('/admin/student/:ic', checkAuth, (req, res) => {
+app.get('/admin/student/:nd', checkAuth, (req, res) => {
   if (req.user.role !== 'admin') return res.redirect('/dashboard');
-  const students = query('SELECT * FROM users WHERE ic_number = ?', [req.params.ic]);
+  const students = query('SELECT * FROM users WHERE nombor_daftar = ?', [req.params.nd]);
   if (students.length === 0) return res.redirect('/admin/students');
-  const duties = query('SELECT * FROM duties WHERE user_ic = ? ORDER BY created_at DESC', [req.params.ic]);
+  const duties = query('SELECT * FROM duties WHERE nombor_daftar = ? ORDER BY created_at DESC', [req.params.nd]);
   res.render('admin-student-duties', { user: req.user, student: students[0], duties: duties });
 });
 
@@ -150,8 +150,8 @@ app.post('/delete-duty/:id', checkAuth, (req, res) => {
   res.json({ success: true });
 });
 
+app.get('/health', (req, res) => res.send('OK'));
+
 initDB().then(() => {
   app.listen(PORT, () => console.log('✅ http://localhost:' + PORT));
 });
-
-app.get('/health', (req, res) => res.send('OK'));
