@@ -212,9 +212,19 @@
         <% } %>
         
         <form action="/login" method="POST">
-            <label class="form-label">IC Number</label>
-            <input type="text" name="nombor_daftar" class="form-input" 
-                   placeholder="Enter your IC without dash" required autofocus>
+            <% if (typeof nombor_daftar !== 'undefined') { %>
+                <input type="hidden" name="nombor_daftar" value="<%= nombor_daftar %>">
+            <% } else { %>
+                <label class="form-label">Nombor Daftar</label>
+                <input type="text" name="nombor_daftar" class="form-input" 
+                    placeholder="Enter your nombor daftar" required autofocus>
+            <% } %>
+            
+            <% if (typeof requirePassword !== 'undefined' && requirePassword) { %>
+                <label class="form-label">Admin Password</label>
+                <input type="password" name="password" class="form-input" 
+                    placeholder="Enter admin password" required autofocus>
+            <% } %>
             
             <button type="submit" class="login-btn">
                 <i class="fas fa-sign-in-alt"></i> Login

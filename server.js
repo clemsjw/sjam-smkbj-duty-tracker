@@ -20,18 +20,18 @@ async function initDB() {
     db = new SQL.Database();
   }
   
-  db.run(`
-    CREATE TABLE IF NOT EXISTS users (
+  db.run(`CREATE TABLE IF NOT EXISTS users (
       nombor_daftar TEXT PRIMARY KEY NOT NULL,
       full_name TEXT NOT NULL,
       role TEXT DEFAULT 'student',
       class TEXT,
       rank TEXT DEFAULT 'member',
+      password TEXT,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-  db.run(`
-    CREATE TABLE IF NOT EXISTS duties (
+    )`);
+  try { db.run("ALTER TABLE users ADD COLUMN password TEXT"); } catch(e) {}
+  
+  db.run(`CREATE TABLE IF NOT EXISTS duties (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       nombor_daftar TEXT NOT NULL,
       event_name TEXT NOT NULL,
@@ -40,8 +40,7 @@ async function initDB() {
       hours REAL,
       status TEXT DEFAULT 'pending',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
+    )`);
   saveDB();
 }
 
@@ -55,9 +54,7 @@ function query(sql, params = []) {
   const stmt = db.prepare(sql);
   stmt.bind(params);
   const rows = [];
-  while (stmt.step()) {
-    rows.push(stmt.getAsObject());
-  }
+  while (stmt.step()) rows.push(stmt.getAsObject());
   stmt.free();
   return rows;
 }
@@ -81,11 +78,15 @@ app.use(passport.session());
 
 passport.use(new LocalStrategy({
   usernameField: 'nombor_daftar',
-  passwordField: 'nombor_daftar'
+  passwordField: 'password'
 }, (nombor_daftar, password, done) => {
   const users = query('SELECT * FROM users WHERE nombor_daftar = ?', [nombor_daftar]);
-  if (users.length === 0) return done(null, false);
-  return done(null, users[0]);
+  if (users.length === 0) return done(null, false, { message: 'User not found' });
+  const user = users[0];
+  if (user.role === 'admin' && user.password !== password) {
+    return done(null, false, { message: 'Incorrect password' });
+  }
+  return done(null, user);
 }));
 
 passport.serializeUser((user, done) => done(null, user.nombor_daftar));
@@ -96,8 +97,40 @@ passport.deserializeUser((nombor_daftar, done) => {
 
 app.get('/', (req, res) => res.redirect('/login'));
 app.get('/login', (req, res) => res.render('login', { error: null }));
-app.post('/login', passport.authenticate('local', { successRedirect: '/dashboard', failureRedirect: '/login' }));
-app.get('/logout', (req, res) => { req.logout(() => res.redirect('/login')); });
+
+app.post('/login', (req, res, next) => {
+  const { nombor_daftar } = req.body;
+  if (!nombor_daftar) return res.render('login', { error: 'Please enter nombor daftar' });
+  
+  // Check if user is admin
+  const users = query('SELECT * FROM users WHERE nombor_daftar = ?', [nombor_daftar]);
+  if (users.length === 0) return res.render('login', { error: 'User not found' });
+  
+  const user = users[0];
+  
+  // If admin and no password provided, show password field
+  if (user.role === 'admin' && !req.body.password) {
+    return res.render('login', { error: null, requirePassword: true, nombor_daftar: nombor_daftar });
+  }
+  
+  // If student, log them in directly
+  if (user.role !== 'admin') {
+    return req.logIn(user, (err) => {
+      if (err) return next(err);
+      return res.redirect('/dashboard');
+    });
+  }
+  
+  passport.authenticate('local', (err, user, info) => {
+    if (err) return next(err);
+    if (!user) return res.render('login', { error: info.message });
+    req.logIn(user, (err) => {
+      if (err) return next(err);
+      return res.redirect('/dashboard');
+    });
+  })(req, res, next);
+
+});app.get('/logout', (req, res) => { req.logout(() => res.redirect('/login')); });
 
 function checkAuth(req, res, next) {
   if (req.isAuthenticated()) return next();
@@ -132,7 +165,7 @@ app.get('/admin', checkAuth, (req, res) => {
 
 app.get('/admin/students', checkAuth, (req, res) => {
   if (req.user.role !== 'admin') return res.redirect('/dashboard');
-  const students = query('SELECT * FROM users ORDER BY full_name');
+  const students = query('SELECT * FROM users ORDER BY class DESC, full_name ASC');
   res.render('admin-students', { user: req.user, students: students });
 });
 
@@ -152,6 +185,4 @@ app.post('/delete-duty/:id', checkAuth, (req, res) => {
 
 app.get('/health', (req, res) => res.send('OK'));
 
-initDB().then(() => {
-  app.listen(PORT, () => console.log('✅ http://localhost:' + PORT));
-});
+initDB().then(() => app.listen(PORT, () => console.log('✅ http://localhost:' + PORT)));
