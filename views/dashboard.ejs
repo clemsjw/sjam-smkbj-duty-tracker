@@ -524,27 +524,24 @@
         }
     });
     
-    document.getElementById('dutyForm').addEventListener('submit', function(e) {
-        var eventSelect = document.getElementById('eventSelect');
-        var otherInput = document.getElementById('otherEventInput');
+    function updateDuration() {
+        var sh = parseInt(document.getElementById('startHour').value);
+        var sm = parseInt(document.getElementById('startMinute').value);
+        var eh = parseInt(document.getElementById('endHour').value);
+        var em = parseInt(document.getElementById('endMinute').value);
+        var dutyDate = document.querySelector('[name="duty_date"]').value;
         
-        if (eventSelect.value === 'other') {
-            if (!otherInput.value.trim()) {
-                e.preventDefault();
-                alert('Please specify the event name!');
-                otherInput.focus();
-                return;
+        if (dutyDate) {
+            var hours = (eh + em/60) - (sh + sm/60);
+            if (hours > 0) {
+                document.getElementById('durationText').textContent = hours.toFixed(1) + ' Hours';
             }
-            eventSelect.value = otherInput.value.trim();
+            var startStr = dutyDate + 'T' + String(sh).padStart(2,'0') + ':' + String(sm).padStart(2,'0') + ':00';
+            var endStr = dutyDate + 'T' + String(eh).padStart(2,'0') + ':' + String(em).padStart(2,'0') + ':00';
+            document.getElementById('startTimeInput').value = startStr;
+            document.getElementById('endTimeInput').value = endStr;
         }
-        
-        updateDuration();
-        
-        if (!document.getElementById('startTimeInput').value || !document.getElementById('endTimeInput').value) {
-            e.preventDefault();
-            alert('Please select date and time.');
-        }
-    });
+    }
     
     document.getElementById('dutyForm').addEventListener('submit', function(e) {
         var eventSelect = document.getElementById('eventSelect');
