@@ -132,8 +132,8 @@ app.get('/admin', checkAuth, (req, res) => {
 
 app.get('/admin/students', checkAuth, (req, res) => {
   if (req.user.role !== 'admin') return res.redirect('/dashboard');
-  const students = query('SELECT * FROM users WHERE role = ? ORDER BY full_name');
-  res.render('admin-students', { user: req.user, students: users });
+  const students = query('SELECT * FROM users ORDER BY full_name');
+  res.render('admin-students', { user: req.user, students: students });
 });
 
 app.get('/admin/student/:ic', checkAuth, (req, res) => {
