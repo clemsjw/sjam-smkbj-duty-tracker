@@ -153,3 +153,5 @@ app.post('/delete-duty/:id', checkAuth, (req, res) => {
 initDB().then(() => {
   app.listen(PORT, () => console.log('✅ http://localhost:' + PORT));
 });
+
+app.get('/health', (req, res) => res.send('OK'));
