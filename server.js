@@ -3,7 +3,6 @@ const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const Database = require('better-sqlite3');
-const SQLiteStore = require('connect-sqlite3')(session);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,11 +36,9 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(session({
-  store: new SQLiteStore({ db: 'sessions.db' }),
   secret: 'school-duty-tracker-2024',
   resave: false,
-  saveUninitialized: false,
-  cookie: { maxAge: 7 * 24 * 60 * 60 * 1000 }
+  saveUninitialized: false
 }));
 app.use(passport.initialize());
 app.use(passport.session());
@@ -93,7 +90,7 @@ app.post('/update-status/:id', checkAuth, (req, res) => {
 
 app.get('/admin', checkAuth, (req, res) => {
   if (req.user.role !== 'admin') return res.redirect('/dashboard');
-  const records = db.prepare(`SELECT d.*, u.full_name, u.class FROM duties d JOIN users u ON d.user_ic = u.ic_number ORDER BY d.created_at DESC`).all();
+  const records = db.prepare('SELECT d.*, u.full_name, u.class FROM duties d JOIN users u ON d.user_ic = u.ic_number ORDER BY d.created_at DESC').all();
   res.render('admin', { user: req.user, records: records });
 });
 
@@ -117,6 +114,4 @@ app.post('/delete-duty/:id', checkAuth, (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(PORT, () => {
-  console.log('✅ http://localhost:' + PORT);
-});
+app.listen(PORT, () => console.log('✅ http://localhost:' + PORT));
