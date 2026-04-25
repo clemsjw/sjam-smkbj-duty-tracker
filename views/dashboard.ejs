@@ -537,24 +537,49 @@
             }
             eventSelect.value = otherInput.value.trim();
         }
+        
+        updateDuration();
+        
+        if (!document.getElementById('startTimeInput').value || !document.getElementById('endTimeInput').value) {
+            e.preventDefault();
+            alert('Please select date and time.');
+        }
     });
     
-    function updateDuration() {
+    document.getElementById('dutyForm').addEventListener('submit', function(e) {
+        var eventSelect = document.getElementById('eventSelect');
+        var otherInput = document.getElementById('otherEventInput');
+        
+        if (eventSelect.value === 'other') {
+            if (!otherInput.value.trim()) {
+                e.preventDefault();
+                alert('Please specify the event name!');
+                otherInput.focus();
+                return;
+            }
+            eventSelect.value = otherInput.value.trim();
+        }
+        
+        // Force set hidden inputs right now
         var sh = parseInt(document.getElementById('startHour').value);
         var sm = parseInt(document.getElementById('startMinute').value);
         var eh = parseInt(document.getElementById('endHour').value);
         var em = parseInt(document.getElementById('endMinute').value);
         var dutyDate = document.querySelector('[name="duty_date"]').value;
         
-        if (dutyDate) {
-            var hours = (eh + em/60) - (sh + sm/60);
-            if (hours > 0) {
-                document.getElementById('durationText').textContent = hours.toFixed(1) + ' Hours';
-            }
-            document.getElementById('startTimeInput').value = dutyDate + 'T' + String(sh).padStart(2,'0') + ':' + String(sm).padStart(2,'0') + ':00';
-            document.getElementById('endTimeInput').value = dutyDate + 'T' + String(eh).padStart(2,'0') + ':' + String(em).padStart(2,'0') + ':00';
+        if (!dutyDate) {
+            e.preventDefault();
+            alert('Please select a date.');
+            return;
         }
-    }
+        
+        var startStr = dutyDate + 'T' + String(sh).padStart(2,'0') + ':' + String(sm).padStart(2,'0') + ':00';
+        var endStr = dutyDate + 'T' + String(eh).padStart(2,'0') + ':' + String(em).padStart(2,'0') + ':00';
+        
+        document.getElementById('startTimeInput').value = startStr;
+        document.getElementById('endTimeInput').value = endStr;
+        document.getElementById('durationText').textContent = ((eh + em/60) - (sh + sm/60)).toFixed(1) + ' Hours';
+    });
     
     document.querySelectorAll('select[name$="hour"], select[name$="minute"]').forEach(function(s) {
         s.addEventListener('change', updateDuration);

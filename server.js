@@ -114,7 +114,7 @@ app.post('/add-duty', checkAuth, (req, res) => {
   const start = new Date(start_time);
   const end = new Date(end_time);
   const hours = (end - start) / (1000 * 60 * 60);
-  run('INSERT INTO duties (nombor_daftar, event_name, start_time, end_time, hours) VALUES (?, ?, ?, ?, ?)', [req.user.nombor_daftar, event_name, start_time.toISOString(), end_time.toISOString(), hours]);
+  run('INSERT INTO duties (nombor_daftar, event_name, start_time, end_time, hours) VALUES (?, ?, ?, ?, ?)', [req.user.nombor_daftar, event_name, start.toISOString(), end.toISOString(), hours]);
   res.redirect('/dashboard');
 });
 
