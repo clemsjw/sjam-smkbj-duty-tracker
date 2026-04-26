@@ -238,4 +238,28 @@ app.get('/debug/db', (req, res) => {
   res.json({ users, duties });
 });
 
+app.get('/admin/student/:nd/export', checkAuth, (req, res) => {
+  if (req.user.role !== 'admin') return res.redirect('/dashboard');
+  const students = query('SELECT * FROM users WHERE nombor_daftar = ?', [req.params.nd]);
+  if (students.length === 0) return res.redirect('/admin/students');
+  const student = students[0];
+  const allDuties = query('SELECT * FROM duties WHERE nombor_daftar = ? ORDER BY created_at ASC', [req.params.nd]);
+  const duties = allDuties.filter(d => d.status === 'approved');
+
+  let csv = `Nombor Daftar:,${student.nombor_daftar},Name:,${student.full_name},Class:,${student.class || ''}\n\n`;
+  csv += 'No.,Event,Duration (hrs),Date\n';
+  
+  duties.forEach((d, i) => {
+    const date = new Date(d.start_time);
+    const day = String(date.getDate()).padStart(2,'0');
+    const month = String(date.getMonth() + 1).padStart(2,'0');
+    const year = date.getFullYear();
+    csv += `${i + 1},${d.event_name},${(d.hours || 0).toFixed(1)},${day}/${month}/${year}\n`;
+  });
+
+  res.setHeader('Content-Type', 'text/csv');
+  res.setHeader('Content-Disposition', `attachment; filename=${student.full_name}_duties.csv`);
+  res.send(csv);
+});
+
 initDB().then(() => app.listen(PORT, () => console.log('✅ http://localhost:' + PORT)));
