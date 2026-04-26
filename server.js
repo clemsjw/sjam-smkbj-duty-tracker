@@ -264,4 +264,13 @@ app.get('/admin/student/:nd/export', checkAuth, (req, res) => {
   res.send(csv);
 });
 
+app.post('/edit-duty/:id', checkAuth, (req, res) => {
+  const { event_name, start_time, end_time } = req.body;
+  const start = new Date(start_time), end = new Date(end_time);
+  let hours = (end - start) / (1000 * 60 * 60);
+  if (hours <= 0) hours += 24;
+  run('UPDATE duties SET event_name = ?, start_time = ?, end_time = ?, hours = ? WHERE id = ? AND nombor_daftar = ?', [event_name, start.toISOString(), end.toISOString(), hours, req.params.id, req.user.nombor_daftar]);
+  res.json({ success: true });
+});
+
 initDB().then(() => app.listen(PORT, () => console.log('✅ http://localhost:' + PORT)));
