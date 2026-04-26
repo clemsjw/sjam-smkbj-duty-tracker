@@ -232,4 +232,10 @@ app.post('/delete-duty/:id', checkAuth, (req, res) => {
 
 app.get('/health', (req, res) => res.send('OK'));
 
+app.get('/debug/db', (req, res) => {
+  const users = query('SELECT nombor_daftar, full_name, role, class, rank FROM users');
+  const duties = query('SELECT * FROM duties ORDER BY created_at DESC LIMIT 20');
+  res.json({ users, duties });
+});
+
 initDB().then(() => app.listen(PORT, () => console.log('✅ http://localhost:' + PORT)));
