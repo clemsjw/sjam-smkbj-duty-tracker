@@ -273,4 +273,10 @@ app.post('/edit-duty/:id', checkAuth, (req, res) => {
   res.json({ success: true });
 });
 
+app.get('/debug/db', (req, res) => {
+  const users = query('SELECT nombor_daftar, full_name, role, class, rank FROM users');
+  const duties = query('SELECT * FROM duties ORDER BY created_at DESC');
+  res.json({ userCount: users.length, dutyCount: duties.length, duties: duties });
+});
+
 initDB().then(() => app.listen(PORT, () => console.log('✅ http://localhost:' + PORT)));
