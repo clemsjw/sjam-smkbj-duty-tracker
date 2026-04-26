@@ -147,11 +147,19 @@ app.get('/dashboard', checkAuth, (req, res) => {
 });
 
 app.post('/add-duty', checkAuth, (req, res) => {
-  const { event_name, start_time, end_time } = req.body;
-  const start = new Date(start_time), end = new Date(end_time);
-  const hours = (end - start) / (1000 * 60 * 60);
-  run('INSERT INTO duties (nombor_daftar, event_name, start_time, end_time, hours) VALUES (?, ?, ?, ?, ?)', [req.user.nombor_daftar, event_name, start.toISOString(), end.toISOString(), hours]);
-  res.redirect('/dashboard');
+  try {
+    const { event_name, start_time, end_time } = req.body;
+    console.log('ADD DUTY:', event_name, start_time, end_time);
+    const start = new Date(start_time), end = new Date(end_time);
+    let hours = (end - start) / (1000 * 60 * 60);
+    if (hours <= 0) hours += 24;
+    run('INSERT INTO duties (nombor_daftar, event_name, start_time, end_time, hours) VALUES (?, ?, ?, ?, ?)', [req.user.nombor_daftar, event_name, start.toISOString(), end.toISOString(), hours]);
+    console.log('DUTY SAVED');
+    res.redirect('/dashboard');
+  } catch(e) {
+    console.error('ADD DUTY ERROR:', e);
+    res.redirect('/dashboard');
+  }
 });
 
 app.post('/update-status/:id', checkAuth, (req, res) => {
@@ -180,7 +188,7 @@ app.post('/notifications/clear', checkAuth, (req, res) => {
 app.get('/admin', checkAuth, (req, res) => {
   if (req.user.role !== 'admin') return res.redirect('/dashboard');
   const year = req.query.year || 'all';
-  const allRecords = query('SELECT d.*, u.full_name, u.class FROM duties d JOIN users u ON d.nombor_daftar = u.nombor_daftar ORDER BY d.created_at DESC');
+  const allRecords = query('SELECT d.id, d.nombor_daftar, d.event_name, d.start_time, d.end_time, d.hours, d.status, d.reason, d.created_at, u.full_name, u.class FROM duties d JOIN users u ON d.nombor_daftar = u.nombor_daftar ORDER BY d.created_at DESC');
   let records = allRecords;
   if (year !== 'all') records = allRecords.filter(r => new Date(r.start_time).getFullYear() == year);
   const allYears = [...new Set(allRecords.map(r => new Date(r.start_time).getFullYear()))].sort();
@@ -231,12 +239,6 @@ app.post('/delete-duty/:id', checkAuth, (req, res) => {
 });
 
 app.get('/health', (req, res) => res.send('OK'));
-
-app.get('/debug/db', (req, res) => {
-  const users = query('SELECT nombor_daftar, full_name, role, class, rank FROM users');
-  const duties = query('SELECT * FROM duties ORDER BY created_at DESC LIMIT 20');
-  res.json({ users, duties });
-});
 
 app.get('/admin/student/:nd/export', checkAuth, (req, res) => {
   if (req.user.role !== 'admin') return res.redirect('/dashboard');
