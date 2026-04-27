@@ -35,8 +35,8 @@
         tr:hover { background: #fdf8f4; }
         td[contenteditable] { cursor: text; outline: none; border-radius: 4px; }
         td[contenteditable]:focus { background: #fff3cd; box-shadow: inset 0 0 0 2px #f39c12; }
-        .save-btn { background: #8B5E3C; color: white; border: none; padding: 6px 14px; border-radius: 15px; cursor: pointer; font-size: 11px; font-weight: 600; }
-        .save-btn:hover { background: #6B3F1F; }
+        .save-btn { background: #27ae60; color: white; border: none; padding: 6px 14px; border-radius: 15px; cursor: pointer; font-size: 11px; font-weight: 600; }
+        .save-btn:hover { background: #186d3c; }
         .delete-btn { background: #e74c3c; color: white; border: none; padding: 6px 14px; border-radius: 15px; cursor: pointer; font-size: 11px; font-weight: 600; margin-left: 5px; }
         .delete-btn:hover { background: #c0392b; }
         .footer { background: linear-gradient(135deg, #6B3F1F, #8B5E3C); color: white; text-align: center; padding: 20px; margin-top: 30px; }
@@ -57,7 +57,7 @@
         <a href="/admin"><i class="fas fa-list-ul"></i> All Records</a>
         <a href="/admin/students"><i class="fas fa-user-check"></i> Individual</a>
         <a href="/admin/slides"><i class="fas fa-images"></i> Slides</a>
-        <a href="/admin/db-editor" class="active"><i class="fas fa-database"></i> DB</a>
+        <a href="/admin/db-editor" class="active"><i class="fas fa-database"></i> Database</a>
     </div>
     <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Log Out</a>
 </div>
@@ -89,7 +89,7 @@
                                     <td contenteditable="true" data-col="<%= col %>"><%= row[col] !== null ? row[col] : '' %></td>
                                 <% }); %>
                                 <td>
-                                    <button class="save-btn" onclick="saveRow(this)"><i class="fas fa-save"></i> Save</button>
+                                    <button class="save-btn" onclick="saveRow(this)"></i> Save</button>
                                     <button class="delete-btn" onclick="deleteRow(this)"><i class="fas fa-trash"></i> Delete</button>
                                 </td>
                             </tr>
@@ -132,7 +132,7 @@
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({table: table, id: id, data: data})
         }).then(r => r.json()).then(d => {
-            if(d.success) { btn.textContent = '✓ Saved'; btn.style.background = '#27ae60'; setTimeout(() => { btn.textContent = 'Save'; btn.style.background = '#8B5E3C'; }, 1500); }
+            if(d.success) { btn.textContent = '✓ Saved'; btn.style.background = '#27ae60'; setTimeout(() => { btn.textContent = 'Save'; btn.style.background = '#27ae60'; }, 1500); }
         });
     }
     function deleteRow(btn) {

@@ -282,7 +282,7 @@ app.get('/debug/db', (req, res) => {
 app.get('/admin/db-editor', checkAuth, (req, res) => {
   if (req.user.role !== 'admin') return res.redirect('/');
   const tables = {
-    users: query('SELECT * FROM users'),
+    users: query('SELECT * FROM users ORDER BY class DESC, full_name ASC'),
     duties: query('SELECT * FROM duties ORDER BY created_at DESC'),
     notifications: query('SELECT * FROM notifications ORDER BY created_at DESC'),
     slides: query('SELECT * FROM slides')
