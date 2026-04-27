@@ -279,4 +279,15 @@ app.get('/debug/db', (req, res) => {
   res.json({ userCount: users.length, dutyCount: duties.length, duties: duties });
 });
 
+app.get('/admin/db-editor', checkAuth, (req, res) => {
+  if (req.user.role !== 'admin') return res.redirect('/');
+  const tables = {
+    users: query('SELECT * FROM users'),
+    duties: query('SELECT * FROM duties ORDER BY created_at DESC'),
+    notifications: query('SELECT * FROM notifications ORDER BY created_at DESC'),
+    slides: query('SELECT * FROM slides')
+  };
+  res.render('db-editor', { tables: tables });
+});
+
 initDB().then(() => app.listen(PORT, () => console.log('✅ http://localhost:' + PORT)));
