@@ -290,4 +290,22 @@ app.get('/admin/db-editor', checkAuth, (req, res) => {
   res.render('db-editor', { tables: tables });
 });
 
+app.post('/api/db/update', checkAuth, (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+  const { table, id, data } = req.body;
+  const sets = Object.keys(data).map(k => `${k} = ?`).join(', ');
+  const values = Object.values(data);
+  const idCol = table === 'users' ? 'nombor_daftar' : 'id';
+  run(`UPDATE ${table} SET ${sets} WHERE ${idCol} = ?`, [...values, id]);
+  res.json({ success: true });
+});
+
+app.post('/api/db/delete', checkAuth, (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+  const { table, id } = req.body;
+  const idCol = table === 'users' ? 'nombor_daftar' : 'id';
+  run(`DELETE FROM ${table} WHERE ${idCol} = ?`, [id]);
+  res.json({ success: true });
+});
+
 initDB().then(() => app.listen(PORT, () => console.log('✅ http://localhost:' + PORT)));
