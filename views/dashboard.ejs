@@ -53,7 +53,7 @@
         .stat-card.pending .icon-circle { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; } .stat-card.pending h3 { color: #f39c12; } .stat-card.pending { border-top: 5px solid #f39c12; }
         .main-grid { display: flex; gap: 25px; flex-wrap: wrap; }
         .form-section { flex: 1; min-width: 350px; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
-        .table-section { flex: 2; min-width: 500px; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); overflow-x: auto; }
+        .table-section { flex: 2; min-width: 500px; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); overflow: hidden; border: 1px solid rgba(139, 94, 60, 0.1); max-height: 600px; display: flex; flex-direction: column; }
         .section-title { color: #5a3921; padding-bottom: 12px; margin-bottom: 25px; font-size: 20px; font-weight: 700; display: flex; align-items: center; gap: 10px; border-bottom: 3px solid; border-image: linear-gradient(135deg, #8B5E3C, #DBC4B8) 1; }
         .form-label { display: block; margin-bottom: 6px; font-weight: 600; color: #5a3921; font-size: 13px; text-transform: uppercase; }
         .form-select, .form-control { width: 100%; padding: 12px 15px; border: 2px solid #e8e0d8; border-radius: 12px; font-size: 14px; margin-bottom: 18px; background: #fdfcfb; }
@@ -170,24 +170,26 @@
             <h3 class="section-title"><i class="fas fa-history"></i> My Duty Records</h3>
             <div class="year-filter"><span>YEAR:</span><a href="?year=all" class="<%= (typeof currentYear==='undefined'||currentYear==='all')?'active':'' %>">All</a><% if(typeof allYears!=='undefined'){allYears.forEach(function(y){%><a href="?year=<%=y%>" class="<%=currentYear==y?'active':''%>"><%=y%></a><%});}%></div>
             <input type="text" id="dutySearch" class="search-box" placeholder="🔍 Search your records...">
-            <table class="duty-table">
-                <thead><tr><th>Event</th><th>Date</th><th>Time</th><th>Hours</th><th>Status</th><th>Action</th></tr></thead>
-                <tbody>
-                    <% if(duties.length===0){%><tr><td colspan="6" style="text-align:center;padding:50px;color:#ccc;"><i class="fas fa-inbox" style="font-size:50px;"></i><p>No duty records yet</p></td></tr><%}%>
-                    <% duties.forEach(function(duty){%>
-                    <tr>
-                        <td><strong><%=duty.event_name%></strong></td>
-                        <td><%=new Date(duty.start_time).toLocaleDateString('en-MY')%></td>
-                        <td><%=new Date(duty.start_time).toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'})%> - <%=new Date(duty.end_time).toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'})%></td>
-                        <td><span class="hour-badge"><%=(duty.hours||0).toFixed(1)%> hrs</span></td>
-                        <td><%if(duty.status==='approved'){%><span class="badge badge-success">Approved</span><%}else if(duty.status==='rejected'){%><span class="badge badge-danger">Rejected</span><%}else{%><span class="badge badge-warning">Pending</span><%}%></td>
-                        <td>
-                            <% if(duty.status==='pending'){%><button class="btn-sm btn-edit" onclick="editDuty('<%=duty.id%>','<%=duty.event_name.replace(/'/g,"\\'")%>','<%=duty.start_time%>','<%=duty.end_time%>')">Edit</button><%}%>
-                        </td>
-                    </tr>
-                    <%});%>
-                </tbody>
-            </table>
+            <div style="overflow-y: auto; flex: 1;">
+                <table class="duty-table">
+                    <thead><tr><th>Event</th><th>Date</th><th>Time</th><th>Hours</th><th>Status</th><th>Action</th></tr></thead>
+                    <tbody>
+                        <% if(duties.length===0){%><tr><td colspan="6" style="text-align:center;padding:50px;color:#ccc;"><i class="fas fa-inbox" style="font-size:50px;"></i><p>No duty records yet</p></td></tr><%}%>
+                        <% duties.forEach(function(duty){%>
+                        <tr>
+                            <td><strong><%=duty.event_name%></strong></td>
+                            <td><%=new Date(duty.start_time).toLocaleDateString('en-MY')%></td>
+                            <td><%=new Date(duty.start_time).toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'})%> - <%=new Date(duty.end_time).toLocaleTimeString('en-MY',{hour:'2-digit',minute:'2-digit'})%></td>
+                            <td><span class="hour-badge"><%=(duty.hours||0).toFixed(1)%> hrs</span></td>
+                            <td><%if(duty.status==='approved'){%><span class="badge badge-success">Approved</span><%}else if(duty.status==='rejected'){%><span class="badge badge-danger">Rejected</span><%}else{%><span class="badge badge-warning">Pending</span><%}%></td>
+                            <td>
+                                <% if(duty.status==='pending'){%><button class="btn-sm btn-edit" onclick="editDuty('<%=duty.id%>','<%=duty.event_name.replace(/'/g,"\\'")%>','<%=duty.start_time%>','<%=duty.end_time%>')">Edit</button><%}%>
+                            </td>
+                        </tr>
+                        <%});%>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

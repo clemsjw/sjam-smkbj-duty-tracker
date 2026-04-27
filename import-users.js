@@ -1,11 +1,11 @@
-const initSqlJs = require('sql.js');
-const fs = require('fs');
+const { createClient } = require('@libsql/client');
+
+const db = createClient({
+  url: 'libsql://smkbj-duty-clemsjw.aws-ap-northeast-1.turso.io',
+  authToken: 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NzcyNjA4ODYsImlkIjoiMDE5ZGNkMDAtOTcwMS03MTBmLTg5OWYtNzAzNzEwMDk0MGZmIiwicmlkIjoiYzY3NWU0ZmEtMWRkYy00MmYwLWJlZjItZmRhMDU1MDgwOTg1In0.6Z3_P17frFZmELIf9hw1azY9s1KypZXbzoFrt4S43IHj77VNoXAWdm3g927HU9dndBgbBD8oDKA2TODHQNQECQ'
+});
 
 async function importUsers() {
-  const SQL = await initSqlJs();
-  const buffer = fs.readFileSync('./school_duty.db');
-  const db = new SQL.Database(buffer);
-  
   const users = [
     ['22170', 'Madeline Tan', 'admin', '5 Adara', 'Cadet Sergeant','madeline'],
     ['22084', 'Nathan', 'student', '5 Acrux', 'Cadet',null],
@@ -156,14 +156,14 @@ async function importUsers() {
     ['26188', 'Izzara Bt Izhar', 'student', '1 Altair', 'Member', null]
   ];
   
-  users.forEach(u => {
-    db.run('INSERT OR REPLACE INTO users (nombor_daftar, full_name, role, class, rank,password) VALUES (?, ?, ?, ?, ?, ?)', u);
-  });
+  for (const u of users) {
+    await db.execute({
+      sql: 'INSERT OR REPLACE INTO users (nombor_daftar, full_name, role, class, rank, password) VALUES (?, ?, ?, ?, ?, ?)',
+      args: u
+    });
+  }
   
-  const data = db.export();
-  fs.writeFileSync('./school_duty.db', Buffer.from(data));
-  console.log('✅ Done');
-  db.close();
+  console.log('✅ All users imported to Turso!');
 }
 
 importUsers();

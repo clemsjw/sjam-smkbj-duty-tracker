@@ -126,7 +126,7 @@ app.post('/add-duty', checkAuth, async (req, res) => {
   const start = new Date(start_time), end = new Date(end_time);
   let hours = (end - start) / (1000 * 60 * 60);
   if (hours <= 0) hours += 24;
-  await run('INSERT INTO duties (nombor_daftar, event_name, start_time, end_time, hours) VALUES (?, ?, ?, ?, ?)', [req.user.nombor_daftar, event_name, start.toISOString(), end.toISOString(), hours]);
+  await run('INSERT INTO duties (nombor_daftar, event_name, start_time, end_time, hours) VALUES (?, ?, ?, ?, ?)', [req.user.nombor_daftar, event_name, start.toLocaleString('sv-SE').replace(' ', 'T'), end.toLocaleString('sv-SE').replace(' ', 'T'), hours]);
   res.redirect('/dashboard');
 });
 
@@ -231,7 +231,7 @@ app.post('/edit-duty/:id', checkAuth, async (req, res) => {
   const start = new Date(start_time), end = new Date(end_time);
   let hours = (end - start) / (1000 * 60 * 60);
   if (hours <= 0) hours += 24;
-  await run('UPDATE duties SET event_name = ?, start_time = ?, end_time = ?, hours = ? WHERE id = ? AND nombor_daftar = ?', [event_name, start.toISOString(), end.toISOString(), hours, req.params.id, req.user.nombor_daftar]);
+  await run('UPDATE duties SET event_name = ?, start_time = ?, end_time = ?, hours = ? WHERE id = ? AND nombor_daftar = ?', [event_name, start.toLocaleString('sv-SE').replace(' ', 'T'), end.toLocaleString('sv-SE').replace(' ', 'T'), hours, req.params.id, req.user.nombor_daftar]);
   res.json({ success: true });
 });
 
