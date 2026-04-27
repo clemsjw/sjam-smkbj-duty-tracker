@@ -9,55 +9,79 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Poppins', Arial, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; }
-        .header { background: #16213e; padding: 20px; text-align: center; border-bottom: 2px solid #0f3460; }
-        .header h1 { font-size: 22px; color: #e94560; }
-        .tabs { display: flex; gap: 5px; padding: 15px 20px; background: #0f3460; flex-wrap: wrap; }
-        .tabs button { padding: 8px 18px; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 13px; background: #16213e; color: #eee; }
-        .tabs button.active { background: #e94560; color: white; }
-        .table-container { padding: 20px; overflow-x: auto; }
+        body { font-family: 'Poppins', Arial, sans-serif; background: #f0ebe3; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #6B3F1F, #8B5E3C, #A0724A); color: white; padding: 20px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; box-shadow: 0 4px 20px rgba(107, 63, 31, 0.3); }
+        .header-logo-school { width: 40px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+        .header-logo-sjam { width: 55px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
+        .header-text { text-align: center; }
+        .header-text h1 { font-size: 26px; font-weight: 800; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .header-text p { font-size: 13px; margin-top: 5px; font-weight: 300; letter-spacing: 3px; }
+        .navbar { background: linear-gradient(180deg, #DBC4B8, #c9ab98); padding: 12px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: center; position: relative; }
+        .navbar-center { display: flex; align-items: center; gap: 10px; }
+        .navbar a { border-radius: 25px; color: #5a3921; text-decoration: none; padding: 10px 18px; display: inline-block; font-weight: 600; transition: all 0.3s; }
+        .navbar a:hover { background: rgba(255,255,255,0.3); color: #3d2210; transform: translateY(-2px); }
+        .navbar a.active { background: linear-gradient(135deg, #8B5E3C, #6B3F1F); color: white !important; }
+        .logout-btn { background: linear-gradient(135deg, #e74c3c, #c0392b) !important; color: white !important; position: absolute; right: 30px; top: 50%; transform: translateY(-50%); }
+        
+        .content { padding: 20px; background: #f9f7f4; min-height: 70vh; }
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tabs button { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-weight: 600; font-size: 13px; background: white; color: #5a3921; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: all 0.3s; }
+        .tabs button.active { background: linear-gradient(135deg, #8B5E3C, #6B3F1F); color: white; box-shadow: 0 4px 15px rgba(107,63,31,0.3); }
+        .search-box { width: 100%; padding: 12px 18px; border: 2px solid #e8e0d8; border-radius: 12px; font-size: 14px; margin-bottom: 15px; background: white; }
+        .table-container { background: white; border-radius: 15px; padding: 5px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { background: #0f3460; padding: 10px; text-align: left; font-size: 11px; text-transform: uppercase; position: sticky; top: 0; }
-        td { padding: 8px 10px; border-bottom: 1px solid #16213e; }
-        tr:hover { background: rgba(233,69,96,0.1); }
-        td[contenteditable] { cursor: text; outline: none; }
-        td[contenteditable]:focus { background: rgba(233,69,96,0.2); border-radius: 4px; }
-        .save-btn { background: #e94560; color: white; border: none; padding: 5px 12px; border-radius: 10px; cursor: pointer; font-size: 11px; }
-        .delete-btn { background: #c0392b; color: white; border: none; padding: 5px 12px; border-radius: 10px; cursor: pointer; font-size: 11px; margin-left: 5px; }
-        .search-box { width: 300px; padding: 8px 15px; border-radius: 20px; border: none; background: #16213e; color: white; margin: 10px 20px; }
-        @media (max-width: 768px) { table { font-size: 11px; } th, td { padding: 6px; } }
+        th { background: #DBC4B8; padding: 12px 10px; text-align: left; font-size: 11px; text-transform: uppercase; color: #5a3921; position: sticky; top: 0; border-bottom: 2px solid #8B5E3C; }
+        td { padding: 10px; border-bottom: 1px solid #f0ebe3; color: #333; }
+        tr:hover { background: #fdf8f4; }
+        td[contenteditable] { cursor: text; outline: none; border-radius: 4px; }
+        td[contenteditable]:focus { background: #fff3cd; box-shadow: inset 0 0 0 2px #f39c12; }
+        .save-btn { background: #8B5E3C; color: white; border: none; padding: 6px 14px; border-radius: 15px; cursor: pointer; font-size: 11px; font-weight: 600; }
+        .save-btn:hover { background: #6B3F1F; }
+        .delete-btn { background: #e74c3c; color: white; border: none; padding: 6px 14px; border-radius: 15px; cursor: pointer; font-size: 11px; font-weight: 600; margin-left: 5px; }
+        .delete-btn:hover { background: #c0392b; }
+        .footer { background: linear-gradient(135deg, #6B3F1F, #8B5E3C); color: white; text-align: center; padding: 20px; margin-top: 30px; }
+        @media (max-width: 768px) { th, td { font-size: 11px; padding: 6px; } .navbar { flex-direction: column; gap: 5px; padding: 10px; } .logout-btn { position: static; transform: none; } }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1><i class="fas fa-database"></i> Database Editor</h1>
+
+<div class="header">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/4/49/Lencana_Sekolah_SMKBJ.png" alt="School Logo" class="header-logo-school">
+    <img src="https://sjam.org.my/wp-content/uploads/2019/05/SJAM-logo.png" alt="St John Logo" class="header-logo-sjam">
+    <div class="header-text"><h1>DATABASE EDITOR</h1><p>S M K &nbsp; B U K I T &nbsp; J A M B U L</p></div>
+</div>
+
+<div class="navbar">
+    <div class="navbar-center">
+        <a href="/dashboard"><i class="fas fa-home"></i> Home</a>
+        <a href="/admin"><i class="fas fa-list-ul"></i> All Records</a>
+        <a href="/admin/students"><i class="fas fa-user-check"></i> Individual</a>
+        <a href="/admin/slides"><i class="fas fa-images"></i> Slides</a>
+        <a href="/admin/db-editor" class="active"><i class="fas fa-database"></i> DB</a>
     </div>
-    
+    <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Log Out</a>
+</div>
+
+<div class="content">
     <div class="tabs">
-        <button class="active" onclick="showTable('users')">Users (<%= tables.users.length %>)</button>
-        <button onclick="showTable('duties')">Duties (<%= tables.duties.length %>)</button>
-        <button onclick="showTable('notifications')">Notifications (<%= tables.notifications.length %>)</button>
-        <button onclick="showTable('slides')">Slides (<%= tables.slides.length %>)</button>
+        <button class="active" onclick="showTable('users')"><i class="fas fa-users"></i> Users (<%= tables.users.length %>)</button>
+        <button onclick="showTable('duties')"><i class="fas fa-clipboard-list"></i> Duties (<%= tables.duties.length %>)</button>
+        <button onclick="showTable('notifications')"><i class="fas fa-bell"></i> Notifications (<%= tables.notifications.length %>)</button>
+        <button onclick="showTable('slides')"><i class="fas fa-images"></i> Slides (<%= tables.slides.length %>)</button>
     </div>
     
-    <input type="text" class="search-box" id="searchInput" placeholder="🔍 Search..." oninput="filterTable()">
+    <input type="text" class="search-box" id="searchInput" placeholder="🔍 Search current table..." oninput="filterTable()">
     
     <div class="table-container">
-        <% ['users','duties','notifications','slides'].forEach(function(tableName, idx) { %>
+        <% var tableNames = ['users','duties','notifications','slides']; %>
+        <% tableNames.forEach(function(tableName, idx) { %>
         <div id="table-<%= tableName %>" class="table-wrapper" style="<%= idx === 0 ? '' : 'display:none;' %>">
             <% var data = tables[tableName]; %>
             <% if (data.length === 0) { %>
-                <p style="text-align:center; padding:50px; color:#666;">No data in <%= tableName %></p>
+                <p style="text-align:center; padding:50px; color:#999;">No data in <%= tableName %></p>
             <% } else { %>
                 <table>
-                    <thead>
-                        <tr>
-                            <% Object.keys(data[0]).forEach(function(col) { %>
-                                <th><%= col %></th>
-                            <% }); %>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><% Object.keys(data[0]).forEach(function(col) { %><th><%= col %></th><% }); %><th>Actions</th></tr></thead>
                     <tbody>
                         <% data.forEach(function(row) { %>
                             <tr data-table="<%= tableName %>" data-id="<%= row.id || row.nombor_daftar || row[Object.keys(row)[0]] %>">
@@ -65,8 +89,8 @@
                                     <td contenteditable="true" data-col="<%= col %>"><%= row[col] !== null ? row[col] : '' %></td>
                                 <% }); %>
                                 <td>
-                                    <button class="save-btn" onclick="saveRow(this)">Save</button>
-                                    <button class="delete-btn" onclick="deleteRow(this)">Delete</button>
+                                    <button class="save-btn" onclick="saveRow(this)"><i class="fas fa-save"></i> Save</button>
+                                    <button class="delete-btn" onclick="deleteRow(this)"><i class="fas fa-trash"></i> Delete</button>
                                 </td>
                             </tr>
                         <% }); %>
@@ -76,54 +100,53 @@
         </div>
         <% }); %>
     </div>
+</div>
 
-    <script>
-        function showTable(name) {
-            document.querySelectorAll('.table-wrapper').forEach(t => t.style.display = 'none');
-            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-            document.getElementById('table-' + name).style.display = 'block';
-            event.target.classList.add('active');
-        }
-        
-        function filterTable() {
-            var s = document.getElementById('searchInput').value.toLowerCase();
-            document.querySelectorAll('.table-wrapper:not([style*="display: none"]) tbody tr').forEach(function(row) {
-                row.style.display = row.textContent.toLowerCase().includes(s) ? '' : 'none';
-            });
-        }
-        
-        function saveRow(btn) {
-            var row = btn.closest('tr');
-            var table = row.dataset.table;
-            var id = row.dataset.id;
-            var data = {};
-            row.querySelectorAll('td[contenteditable]').forEach(function(td) {
-                data[td.dataset.col] = td.textContent;
-            });
-            
-            fetch('/api/db/update', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({table: table, id: id, data: data})
-            }).then(r => r.json()).then(d => {
-                if(d.success) { btn.textContent = '✓'; btn.style.background = '#27ae60'; setTimeout(() => { btn.textContent = 'Save'; btn.style.background = '#e94560'; }, 1500); }
-            });
-        }
-        
-        function deleteRow(btn) {
-            if(!confirm('Delete this row permanently?')) return;
-            var row = btn.closest('tr');
-            var table = row.dataset.table;
-            var id = row.dataset.id;
-            
-            fetch('/api/db/delete', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({table: table, id: id})
-            }).then(r => r.json()).then(d => {
-                if(d.success) row.remove();
-            });
-        }
-    </script>
+<div class="footer">
+    <p><strong>Copyright &copy; 2025-2026 : ST JOHN SMK BUKIT JAMBUL</strong></p>
+    <p><strong>Digital Duty Record System</strong></p>
+</div>
+
+<script>
+    function showTable(name) {
+        document.querySelectorAll('.table-wrapper').forEach(t => t.style.display = 'none');
+        document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+        document.getElementById('table-' + name).style.display = 'block';
+        event.target.classList.add('active');
+    }
+    function filterTable() {
+        var s = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('.table-wrapper:not([style*="display: none"]) tbody tr').forEach(function(row) {
+            row.style.display = row.textContent.toLowerCase().includes(s) ? '' : 'none';
+        });
+    }
+    function saveRow(btn) {
+        var row = btn.closest('tr');
+        var table = row.dataset.table;
+        var id = row.dataset.id;
+        var data = {};
+        row.querySelectorAll('td[contenteditable]').forEach(function(td) {
+            data[td.dataset.col] = td.textContent;
+        });
+        fetch('/api/db/update', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({table: table, id: id, data: data})
+        }).then(r => r.json()).then(d => {
+            if(d.success) { btn.textContent = '✓ Saved'; btn.style.background = '#27ae60'; setTimeout(() => { btn.textContent = 'Save'; btn.style.background = '#8B5E3C'; }, 1500); }
+        });
+    }
+    function deleteRow(btn) {
+        if(!confirm('Delete permanently?')) return;
+        var row = btn.closest('tr');
+        var table = row.dataset.table;
+        var id = row.dataset.id;
+        fetch('/api/db/delete', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({table: table, id: id})
+        }).then(r => r.json()).then(d => {
+            if(d.success) row.remove();
+        });
+    }
+</script>
 </body>
 </html>
