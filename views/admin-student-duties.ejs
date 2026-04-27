@@ -91,6 +91,7 @@
             <p><i class="fas fa-id-card"></i> <%= student.nombor_daftar %> | <i class="fas fa-graduation-cap"></i> <%= student.class || 'No Class' %></p>
         </div>
         <div class="profile-stats">
+            <div><small>Hours</small><h3 style="color:#31708f;"><%= duties.reduce(function(t,d){return t+(d.hours||0);},0).toFixed(1) %></h3></div>
             <div><small>Total</small><h3 style="color:#8B5E3C;"><%= duties.length %></h3></div>
             <div><small>Approved</small><h3 style="color:#27ae60;"><%= duties.filter(function(d){return d.status==='approved'}).length %></h3></div>
             <div><small>Pending</small><h3 style="color:#f39c12;"><%= duties.filter(function(d){return d.status==='pending'}).length %></h3></div>

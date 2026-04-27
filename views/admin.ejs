@@ -91,12 +91,15 @@
     </div>
 
     <div class="year-filter">
+        <input type="text" id="recordSearch" placeholder="🔍 Search by name, event, or class..." style="width:100%; padding:10px 15px; border:2px solid #e8e0d8; border-radius:12px; margin-bottom:15px; font-size:14px;">
         <span style="font-weight:600; color:#5a3921; font-size:13px;">YEAR:</span>
         <a href="?year=all" style="<%= (typeof currentYear === 'undefined' || currentYear === 'all') ? 'background:#8B5E3C; color:white;' : 'background:white; color:#5a3921; border:1px solid #ddd;' %>">All</a>
         <% if (typeof allYears !== 'undefined') { allYears.forEach(function(y) { %>
             <a href="?year=<%= y %>" style="<%= currentYear == y ? 'background:#8B5E3C; color:white;' : 'background:white; color:#5a3921; border:1px solid #ddd;' %>"><%= y %></a>
         <% }); } %>
     </div>
+
+    
 
     <div class="card">
         <div class="card-header">
@@ -223,6 +226,13 @@
             .then(function(r){return r.json();}).then(function(d){ if(d.success) location.reload(); });
         }
     }
+
+    document.getElementById('recordSearch').addEventListener('input', function() {
+    var s = this.value.toLowerCase();
+    document.querySelectorAll('.duty-row').forEach(function(row) {
+        row.style.display = row.textContent.toLowerCase().includes(s) ? '' : 'none';
+    });
+});
 </script>
 </body>
 </html>

@@ -69,6 +69,10 @@
         <button onclick="showTable('notifications')"><i class="fas fa-bell"></i> Notifications (<%= tables.notifications.length %>)</button>
         <button onclick="showTable('slides')"><i class="fas fa-images"></i> Slides (<%= tables.slides.length %>)</button>
     </div>
+
+    <p style="color:#888; font-size:12px; margin-bottom:10px; padding:8px 15px; background:#fff; border-radius:8px; border-left:3px solid #f39c12;">
+    <i class="fas fa-info-circle"></i> <strong>Click</strong> on any cell to edit it, then click <strong>Save</strong> to apply changes. Changes are saved directly to the live database.
+    </p>    
     
     <input type="text" class="search-box" id="searchInput" placeholder="🔍 Search current table..." oninput="filterTable()">
     
