@@ -48,7 +48,7 @@
 <div class="header">
     <img src="https://upload.wikimedia.org/wikipedia/commons/4/49/Lencana_Sekolah_SMKBJ.png" alt="School Logo" class="header-logo-school">
     <img src="https://sjam.org.my/wp-content/uploads/2019/05/SJAM-logo.png" alt="St John Logo" class="header-logo-sjam">
-    <div class="header-text"><h1>DATABASE EDITOR</h1><p>S M K &nbsp; B U K I T &nbsp; J A M B U L</p></div>
+    <div class="header-text"><h1>DUTY HOURS RECORD</h1><p>S M K &nbsp; B U K I T &nbsp; J A M B U L</p></div>
 </div>
 
 <div class="navbar">
@@ -144,7 +144,17 @@
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({table: table, id: id})
         }).then(r => r.json()).then(d => {
-            if(d.success) row.remove();
+            if(d.success) {
+                row.remove();
+                // Update tab count
+                var tabs = document.querySelectorAll('.tabs button');
+                tabs.forEach(function(tab) {
+                    if (tab.textContent.toLowerCase().includes(table)) {
+                        var count = document.querySelectorAll('#table-' + table + ' tbody tr').length;
+                        tab.innerHTML = tab.innerHTML.replace(/\(\d+\)/, '(' + count + ')');
+                    }
+                });
+            }
         });
     }
 </script>
