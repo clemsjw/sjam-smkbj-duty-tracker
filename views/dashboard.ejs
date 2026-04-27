@@ -249,6 +249,22 @@
     var cs=0,slides=document.querySelectorAll('#slideshow img'),dots=document.querySelectorAll('.slideshow-dots span');
     if(slides.length>0){window.showSlide=function(n){slides[cs].classList.remove('active');if(dots.length>0)dots[cs].classList.remove('active');cs=n;slides[cs].classList.add('active');if(dots.length>0)dots[cs].classList.add('active');};if(slides.length>1)setInterval(function(){showSlide((cs+1)%slides.length);},3000);}
     fetch('/notifications/read',{method:'POST'});
+
+    // Auto-refresh notifications every 30 seconds
+    setInterval(function() {
+        fetch('/notifications/poll')
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.unread > 0) {
+                // Reload notification panel silently by fetching dashboard again
+                // Or just show a subtle indicator
+                var bell = document.querySelector('.notification-panel h4');
+                if (bell && !bell.textContent.includes('●')) {
+                    bell.innerHTML = bell.innerHTML.replace('Notifications', '● Notifications');
+                }
+            }
+        });
+    }, 30000);
 </script>
 </body>
 </html>

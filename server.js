@@ -46,6 +46,9 @@ async function initDB() {
       title TEXT,
       link TEXT
     )`);
+
+    // Add action_at column for activity tracking
+  try { await db.execute("ALTER TABLE duties ADD COLUMN action_at DATETIME"); } catch(e) {}
 }
 
 async function query(sql, params = []) {
@@ -141,6 +144,7 @@ app.post('/update-status/:id', checkAuth, async (req, res) => {
     : '[' + today + '] Your duty "' + duty.event_name + '" was reviewed and requires revision. Reason: ' + (reason || 'Not specified.');
   await run('INSERT INTO notifications (nombor_daftar, message) VALUES (?, ?)', [duty.nombor_daftar, msg]);
   res.json({ success: true });
+  await run('UPDATE duties SET status = ?, reason = ?, action_at = CURRENT_TIMESTAMP WHERE id = ?', [status, reason || null, req.params.id]);
 });
 
 app.post('/notifications/read', checkAuth, async (req, res) => {
