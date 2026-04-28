@@ -10,18 +10,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', Arial, sans-serif; background: #f0ebe3; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #6B3F1F, #8B5E3C, #A0724A); color: white; padding: 20px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; box-shadow: 0 4px 20px rgba(107, 63, 31, 0.3); }
-        .header-logo-school { width: 40px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
-        .header-logo-sjam { width: 55px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
-        .header-text { text-align: center; }
-        .header-text h1 { font-size: 26px; font-weight: 800; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .header-text p { font-size: 13px; margin-top: 5px; font-weight: 300; letter-spacing: 3px; }
-        .navbar { background: linear-gradient(180deg, #DBC4B8, #c9ab98); padding: 12px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: center; position: relative; }
-        .navbar-center { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .navbar a { border-radius: 25px; color: #5a3921; text-decoration: none; padding: 10px 18px; display: inline-block; font-weight: 600; transition: all 0.3s ease; font-size: 14px; }
-        .navbar a:hover { background: rgba(255,255,255,0.3); color: #3d2210; transform: translateY(-2px); }
-        .navbar a.active { background: linear-gradient(135deg, #8B5E3C, #6B3F1F); color: white !important; }
-        .logout-btn { background: linear-gradient(135deg, #e74c3c, #c0392b) !important; color: white !important; }
         .content { padding: 20px; background: linear-gradient(180deg, #f9f7f4, #f0ebe3); min-height: 70vh; }
         .stats-row { display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
         .stat-card { flex: 1; min-width: 120px; background: white; padding: 15px; border-radius: 15px; text-align: center; cursor: pointer; border-top: 4px solid #ddd; transition: all 0.3s; }
@@ -32,10 +20,9 @@
         .stat-card.pending { border-top-color: #f39c12; } .stat-card.pending h3 { color: #f39c12; }
         .stat-card.approved { border-top-color: #27ae60; } .stat-card.approved h3 { color: #27ae60; }
         .stat-card.rejected { border-top-color: #e74c3c; } .stat-card.rejected h3 { color: #e74c3c; }
-        .bulk-bar { background: #fff; padding: 12px 20px; border-radius: 15px; margin-bottom: 15px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: none; }
+        .bulk-bar { background: #fff; padding: 12px 20px; border-radius: 15px; margin-bottom: 15px; display: none; gap: 10px; align-items: center; flex-wrap: wrap; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
         .bulk-bar button { padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 12px; color: white; }
-        .btn-bulk-approve { background: #27ae60; }
-        .btn-bulk-reject { background: #e74c3c; }
+        .btn-bulk-approve { background: #27ae60; } .btn-bulk-reject { background: #e74c3c; } .btn-bulk-delete { background: #c0392b; }
         .card { background: white; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); overflow: hidden; }
         .card-header { background: #fdf8f4; padding: 15px 20px; border-bottom: 2px solid #DBC4B8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .card-header h5 { color: #5a3921; font-weight: 700; font-size: 16px; }
@@ -75,23 +62,7 @@
 </head>
 <body>
 
-<div class="header">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/4/49/Lencana_Sekolah_SMKBJ.png" alt="School Logo" class="header-logo-school">
-    <img src="https://sjam.org.my/wp-content/uploads/2019/05/SJAM-logo.png" alt="St John Logo" class="header-logo-sjam">
-    <div class="header-text"><h1>DUTY HOURS RECORD</h1><p>S M K &nbsp; B U K I T &nbsp; J A M B U L</p></div>
-</div>
-
-<div class="navbar">
-    <div class="navbar-center">
-        <a href="/dashboard"><i class="fas fa-home"></i> Home</a>
-        <a href="/admin" class="active"><i class="fas fa-list-ul"></i> All Records</a>
-        <a href="/admin/students"><i class="fas fa-user-check"></i> Individual</a>
-        <a href="/admin/slides"><i class="fas fa-images"></i> Slides</a>
-        <a href="/admin/db-editor"><i class="fas fa-database"></i> DB</a>
-    </div>
-    <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Log Out</a>
-</div>
-
+<%- include('partial/header', { currentPage: 'admin', user: user }) %>
 <div class="content">
     <div class="stats-row">
         <div class="stat-card all"><small>Total</small><h3><%= records.length %></h3></div>
@@ -110,8 +81,9 @@
 
     <div class="bulk-bar" id="bulkBar">
         <strong id="selectedCount">0 selected</strong>
-        <button class="btn-bulk-approve" onclick="bulkAction('approved')"><i class="fas fa-check"></i> Approve Selected</button>
-        <button class="btn-bulk-reject" onclick="bulkAction('rejected')"><i class="fas fa-times"></i> Reject Selected</button>
+        <button class="btn-bulk-approve" onclick="bulkAction('approved')"><i class="fas fa-check"></i> Approve</button>
+        <button class="btn-bulk-reject" onclick="bulkAction('rejected')"><i class="fas fa-times"></i> Reject</button>
+        <button class="btn-bulk-delete" onclick="bulkDelete()"><i class="fas fa-trash"></i> Delete</button>
     </div>
 
     <div class="card">
@@ -143,7 +115,7 @@
                         <td><%=(r.hours||0).toFixed(1)%> hrs</td>
                         <td><%if(r.status==='approved'){%><span class="badge badge-success">Approved</span><%}else if(r.status==='rejected'){%><span class="badge badge-danger">Rejected</span><%}else{%><span class="badge badge-warning">Pending</span><%}%></td>
                         <td style="font-size:10px;color:#888;"><%=r.reason||'-'%></td>
-                        <td style="font-size:10px;color:#aaa;"><%=new Date(r.created_at).toLocaleString('en-MY')%></td>
+                        <td style="font-size:10px;color:#aaa;"><%=new Date(new Date(r.created_at).getTime() + 8*60*60*1000).toLocaleString('en-MY', {timeZone:'Asia/Kuala_Lumpur'})%></td>
                         <td>
                             <%if(r.status==='pending'){%><button class="btn-sm btn-approve" onclick="approveDuty('<%=r.id%>')">Approve</button><button class="btn-sm btn-reject" onclick="rejectDuty('<%=r.id%>')">Reject</button>
                             <%}else{%><button class="btn-sm" style="background:#6c757d;" onclick="updateStatus('<%=r.id%>','pending')">Undo</button><%}%>
@@ -187,7 +159,8 @@
 
     function toggleSelectAll(){var c=document.getElementById('selectAll').checked;document.querySelectorAll('.row-check').forEach(function(cb){cb.checked=c;});updateBulkBar();}
     function updateBulkBar(){var c=document.querySelectorAll('.row-check:checked').length;document.getElementById('selectedCount').textContent=c+' selected';document.getElementById('bulkBar').style.display=c>0?'flex':'none';}
-    function bulkAction(status){var ids=[];document.querySelectorAll('.row-check:checked').forEach(function(cb){ids.push(cb.value);});if(ids.length===0)return alert('Select records first');if(!confirm(status.charAt(0).toUpperCase()+status.slice(1)+' '+ids.length+' records?'))return;fetch('/bulk-action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ids,status:status})}).then(function(r){return r.json();}).then(function(d){if(d.success)location.reload();});}
+    function bulkAction(status){var ids=[];document.querySelectorAll('.row-check:checked').forEach(function(cb){ids.push(cb.value);});if(ids.length===0)return alert('Select records first');if(!confirm(status.charAt(0).toUpperCase()+status.slice(1)+' '+ids.length+' records?'))return;fetch('/bulk-action',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ids,status:status})}).then(function(r){return r.json();}).then(function(d){if(d.success)location.reload();else alert('Error: '+(d.error||'Unknown'));}).catch(function(e){alert('Failed. Check console.');console.log(e);});}
+    function bulkDelete(){var ids=[];document.querySelectorAll('.row-check:checked').forEach(function(cb){ids.push(cb.value);});if(ids.length===0)return alert('Select records first');if(!confirm('DELETE '+ids.length+' records permanently?'))return;fetch('/bulk-delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ids:ids})}).then(function(r){return r.json();}).then(function(d){if(d.success)location.reload();});}
 
     function approveDuty(id){if(confirm('Approve?'))updateStatus(id,'approved','');}
     function rejectDuty(id){crid=id;document.getElementById('reasonModal').style.display='flex';document.getElementById('reasonText').value='';}

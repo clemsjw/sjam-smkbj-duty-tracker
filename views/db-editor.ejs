@@ -10,19 +10,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Poppins', Arial, sans-serif; background: #f0ebe3; min-height: 100vh; }
-        .header { background: linear-gradient(135deg, #6B3F1F, #8B5E3C, #A0724A); color: white; padding: 20px; display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; box-shadow: 0 4px 20px rgba(107, 63, 31, 0.3); }
-        .header-logo-school { width: 40px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
-        .header-logo-sjam { width: 55px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
-        .header-text { text-align: center; }
-        .header-text h1 { font-size: 26px; font-weight: 800; letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        .header-text p { font-size: 13px; margin-top: 5px; font-weight: 300; letter-spacing: 3px; }
-        .navbar { background: linear-gradient(180deg, #DBC4B8, #c9ab98); padding: 12px 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100; display: flex; align-items: center; justify-content: center; position: relative; }
-        .navbar-center { display: flex; align-items: center; gap: 10px; }
-        .navbar a { border-radius: 25px; color: #5a3921; text-decoration: none; padding: 10px 18px; display: inline-block; font-weight: 600; transition: all 0.3s; }
-        .navbar a:hover { background: rgba(255,255,255,0.3); color: #3d2210; transform: translateY(-2px); }
-        .navbar a.active { background: linear-gradient(135deg, #8B5E3C, #6B3F1F); color: white !important; }
-        .logout-btn { background: linear-gradient(135deg, #e74c3c, #c0392b) !important; color: white !important; position: absolute; right: 30px; top: 50%; transform: translateY(-50%); }
-        
         .content { padding: 20px; background: #f9f7f4; min-height: 70vh; }
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
         .tabs button { padding: 10px 20px; border: none; border-radius: 25px; cursor: pointer; font-weight: 600; font-size: 13px; background: white; color: #5a3921; box-shadow: 0 2px 10px rgba(0,0,0,0.05); transition: all 0.3s; }
@@ -45,23 +32,7 @@
 </head>
 <body>
 
-<div class="header">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/4/49/Lencana_Sekolah_SMKBJ.png" alt="School Logo" class="header-logo-school">
-    <img src="https://sjam.org.my/wp-content/uploads/2019/05/SJAM-logo.png" alt="St John Logo" class="header-logo-sjam">
-    <div class="header-text"><h1>DUTY HOURS RECORD</h1><p>S M K &nbsp; B U K I T &nbsp; J A M B U L</p></div>
-</div>
-
-<div class="navbar">
-    <div class="navbar-center">
-        <a href="/dashboard"><i class="fas fa-home"></i> Home</a>
-        <a href="/admin"><i class="fas fa-list-ul"></i> All Records</a>
-        <a href="/admin/students"><i class="fas fa-user-check"></i> Individual</a>
-        <a href="/admin/slides"><i class="fas fa-images"></i> Slides</a>
-        <a href="/admin/db-editor" class="active"><i class="fas fa-database"></i> Database</a>
-    </div>
-    <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Log Out</a>
-</div>
-
+<%- include('partial/header', { currentPage: 'db-editor', user: user }) %>
 <div class="content">
     <div class="tabs">
         <button class="active" onclick="showTable('users')"><i class="fas fa-users"></i> Users (<%= tables.users.length %>)</button>
