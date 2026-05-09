@@ -120,7 +120,7 @@
                         <td><%=(r.hours||0).toFixed(1)%> hrs</td>
                         <td><%if(r.status==='approved'){%><span class="badge badge-success">Approved</span><%}else if(r.status==='rejected'){%><span class="badge badge-danger">Rejected</span><%}else{%><span class="badge badge-warning">Pending</span><%}%></td>
                         <td style="font-size:10px;color:#888;"><%=r.reason||'-'%></td>
-                        <td style="font-size:10px;color:#aaa;"><%=new Date(new Date(r.created_at).getTime() + 8*60*60*1000).toLocaleString('en-MY', {timeZone:'Asia/Kuala_Lumpur'})%></td>
+                        <td style="font-size:10px;color:#aaa;"><%=new Date(r.created_at).toLocaleString('en-MY')%></td>
                         <td>
                             <%if(r.status==='pending'){%><button class="btn-sm btn-approve" onclick="approveDuty('<%=r.id%>')">Approve</button><button class="btn-sm btn-reject" onclick="rejectDuty('<%=r.id%>')">Reject</button>
                             <%}else{%><button class="btn-sm" style="background:#6c757d;" onclick="updateStatus('<%=r.id%>','pending')">Undo</button><%}%>
