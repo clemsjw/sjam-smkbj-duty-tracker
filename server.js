@@ -32,7 +32,15 @@ async function run(sql, params = []) { await db.execute({ sql, args: params }); 
 
 function malaysiaTime() {
   const now = new Date();
-  return new Date(now.getTime() + 8*60*60*1000).toISOString().replace('T', ' ').split('.')[0];
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const myt = new Date(utc + (8 * 3600000));
+  const y = myt.getFullYear();
+  const m = String(myt.getMonth() + 1).padStart(2, '0');
+  const d = String(myt.getDate()).padStart(2, '0');
+  const h = String(myt.getHours()).padStart(2, '0');
+  const min = String(myt.getMinutes()).padStart(2, '0');
+  const s = String(myt.getSeconds()).padStart(2, '0');
+  return `${y}-${m}-${d} ${h}:${min}:${s}`;
 }
 
 app.set('view engine', 'ejs');
