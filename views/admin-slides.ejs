@@ -13,14 +13,18 @@
         .content { padding: 30px; min-height: 70vh; background: linear-gradient(180deg, #f9f7f4, #f0ebe3); }
         .card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.08); margin-bottom: 25px; }
         .card h3 { color: #5a3921; margin-bottom: 20px; padding-bottom: 10px; border-bottom: 3px solid; border-image: linear-gradient(135deg, #8B5E3C, #DBC4B8) 1; }
-        .form-row { display: flex; gap: 10px; flex-wrap: wrap; }
-        .form-row input { flex: 1; min-width: 200px; padding: 12px 15px; border: 2px solid #e8e0d8; border-radius: 12px; font-size: 14px; font-family: 'Poppins', sans-serif; }
-        .form-row input:focus { border-color: #8B5E3C; outline: none; }
         .btn { padding: 12px 25px; border: none; border-radius: 25px; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.3s; font-family: 'Poppins', sans-serif; }
-        .btn-primary { background: linear-gradient(135deg, #8B5E3C, #A0724A); color: white; }
+        .btn-primary { background: linear-gradient(135deg, #8B5E3C, #A0724A); color: white !important; }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .btn-danger { background: #e74c3c; color: white; padding: 8px 15px; font-size: 12px; }
+        .btn-danger { background: #e74c3c; color: white; padding: 8px 15px; font-size: 12px; border-radius: 20px !important; }
         .btn-danger:hover { background: #c0392b; transform: translateY(-2px); }
+        .drop-zone { display: block; width: 100%; padding: 40px 20px; border: 3px dashed #DBC4B8; border-radius: 20px; text-align: center; cursor: pointer; background: #fdf8f4; transition: all 0.3s; margin-bottom: 15px; }
+        .drop-zone:hover { border-color: #8B5E3C; background: #f9f2ea; }
+        .drop-zone i { font-size: 40px; color: #8B5E3C; display: block; margin-bottom: 10px; }
+        .drop-zone span { font-weight: 600; color: #5a3921; display: block; }
+        .drop-zone small { font-size: 11px; color: #888; }
+        .title-input { flex: 1; padding: 12px 15px; border: 2px solid #e8e0d8; border-radius: 12px; font-size: 14px; font-family: 'Poppins', sans-serif; }
+        .title-input:focus { border-color: #8B5E3C; outline: none; }
         .slide-grid { display: flex; flex-wrap: wrap; gap: 20px; }
         .slide-card { width: 280px; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.1); transition: all 0.3s; border: 1px solid #eee; }
         .slide-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
@@ -37,21 +41,29 @@
 <div class="content">
     <div class="card">
         <h3><i class="fas fa-plus-circle"></i> Add New Slide</h3>
-        <div class="form-row">
-            <input type="text" id="imageUrl" placeholder="Image URL (e.g. https://i.imgur.com/xxx.png)">
-            <input type="text" id="imageTitle" placeholder="Title">
-            <button class="btn btn-primary" onclick="addSlide()"><i class="fas fa-plus"></i> Add Slide</button>
-        </div>
+        <form id="slideForm" enctype="multipart/form-data">
+            <label for="fileUpload" class="drop-zone" id="dropZone">
+                <i class="fas fa-cloud-upload-alt"></i>
+                <span>Click to choose image or drag here</span>
+                <small>JPG, PNG, or GIF. Max 5MB.</small>
+            </label>
+            <input type="file" name="image" id="fileUpload" accept="image/*" required style="display:none;" onchange="showFileName(this)">
+            <p id="fileName" style="color:#27ae60; font-weight:600; font-size:13px; margin-bottom:10px; display:none;"></p>
+            <div style="display:flex; gap:10px;">
+                <input type="text" name="title" placeholder="Slide title (optional)" class="title-input">
+                <button type="button" class="btn btn-primary" onclick="addSlide()"><i class="fas fa-plus"></i> Add Slide</button>
+            </div>
+        </form>
     </div>
 
     <div class="card">
         <h3><i class="fas fa-images"></i> Current Slides</h3>
-        <div class="slide-grid" id="slideList">
+        <div class="slide-grid">
             <% if (slides.length === 0) { %>
                 <p style="color:#ccc; text-align:center; width:100%; padding:30px;">No slides yet</p>
             <% } %>
             <% slides.forEach(function(s) { %>
-                <div class="slide-card" id="slide-<%= s.id %>">
+                <div class="slide-card">
                     <img src="<%= s.image_url %>" alt="<%= s.title || '' %>">
                     <div class="info">
                         <p><strong><%= s.title || 'No title' %></strong></p>
@@ -69,24 +81,31 @@
 </div>
 
 <script>
-    function addSlide() {
-        var url = document.getElementById('imageUrl').value;
-        var title = document.getElementById('imageTitle').value;
-        if (!url) return alert('Please enter an image URL');
-        fetch('/api/slides/add', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({image_url: url, title: title})
-        }).then(function(r){return r.json();}).then(function(d){
-            if(d.success) location.reload();
-        });
+    var dropZone = document.getElementById('dropZone');
+    dropZone.addEventListener('dragover', function(e) { e.preventDefault(); this.style.borderColor = '#27ae60'; this.style.background = '#f0fff4'; });
+    dropZone.addEventListener('dragleave', function() { this.style.borderColor = '#DBC4B8'; this.style.background = '#fdf8f4'; });
+    dropZone.addEventListener('drop', function(e) {
+        e.preventDefault(); this.style.borderColor = '#DBC4B8'; this.style.background = '#fdf8f4';
+        document.getElementById('fileUpload').files = e.dataTransfer.files;
+        showFileName(document.getElementById('fileUpload'));
+    });
+    function showFileName(input) {
+        var name = input.files[0] ? input.files[0].name : '';
+        document.getElementById('fileName').textContent = '📎 ' + name;
+        document.getElementById('fileName').style.display = name ? 'block' : 'none';
     }
-
+    function addSlide() {
+        var form = document.getElementById('slideForm');
+        var file = document.getElementById('fileUpload').files[0];
+        if (!file) return alert('Please select an image');
+        var fd = new FormData(form);
+        fetch('/api/slides/add', { method: 'POST', body: fd })
+        .then(r => r.json()).then(d => { if(d.success) location.reload(); });
+    }
     function deleteSlide(id) {
         if(confirm('Delete this slide?')){
             fetch('/api/slides/delete/' + id, {method:'POST'})
-            .then(function(r){return r.json();})
-            .then(function(d){ if(d.success) location.reload(); });
+            .then(r => r.json()).then(d => { if(d.success) location.reload(); });
         }
     }
 </script>

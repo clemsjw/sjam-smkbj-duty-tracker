@@ -3,9 +3,16 @@ const session = require('express-session');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const { createClient } = require('@libsql/client');
+const multer = require('multer');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+const storage = multer.diskStorage({
+  destination: './public/uploads/',
+  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+});
+const upload = multer({ storage, limits: { fileSize: 5 * 1024 * 1024 } });
 
 const db = createClient({
   url: 'libsql://smkbj-duty-clemsjw.aws-ap-northeast-1.turso.io',
@@ -125,7 +132,15 @@ app.get('/admin/student/:nd', checkAuth, async (req, res) => {
 });
 
 app.get('/admin/slides', checkAuth, async (req, res) => { if (req.user.role !== 'admin') return res.redirect('/dashboard'); const slides = await query('SELECT * FROM slides ORDER BY id'); res.render('admin-slides', { user: req.user, slides }); });
-app.post('/api/slides/add', checkAuth, async (req, res) => { if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' }); const { image_url, title } = req.body; await run('INSERT INTO slides (image_url, title) VALUES (?, ?)', [image_url, title || '']); res.json({ success: true }); });
+
+app.post('/api/slides/add', checkAuth, upload.single('image'), async (req, res) => {
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+  if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
+  const image_url = '/uploads/' + req.file.filename;
+  await run('INSERT INTO slides (image_url, title) VALUES (?, ?)', [image_url, req.body.title || '']);
+  res.json({ success: true });
+});
+
 app.post('/api/slides/delete/:id', checkAuth, async (req, res) => { if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' }); await run('DELETE FROM slides WHERE id = ?', [req.params.id]); res.json({ success: true }); });
 
 app.post('/delete-duty/:id', checkAuth, async (req, res) => { if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' }); await run('UPDATE duties SET action_at = CURRENT_TIMESTAMP WHERE id = ?', [req.params.id]); await run('DELETE FROM duties WHERE id = ?', [req.params.id]); res.json({ success: true }); });
