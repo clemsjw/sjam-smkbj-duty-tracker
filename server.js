@@ -30,6 +30,11 @@ async function initDB() {
 async function query(sql, params = []) { const r = await db.execute({ sql, args: params }); return r.rows; }
 async function run(sql, params = []) { await db.execute({ sql, args: params }); }
 
+function malaysiaTime() {
+  const now = new Date();
+  return new Date(now.getTime() + 8*60*60*1000).toISOString().replace('T', ' ').split('.')[0];
+}
+
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
@@ -86,14 +91,14 @@ app.post('/add-duty', checkAuth, async (req, res) => {
   const start = new Date(start_time), end = new Date(end_time);
   let hours = (end - start) / (1000 * 60 * 60);
   if (hours <= 0) hours += 24;
-  await run('INSERT INTO duties (nombor_daftar, event_name, start_time, end_time, hours) VALUES (?, ?, ?, ?, ?)', [req.user.nombor_daftar, event_name, start.toLocaleString('sv-SE').replace(' ', 'T'), end.toLocaleString('sv-SE').replace(' ', 'T'), hours]);
+  await run('INSERT INTO duties (nombor_daftar, event_name, start_time, end_time, hours, created_at) VALUES (?, ?, ?, ?, ?, ?)', [req.user.nombor_daftar, event_name, start.toLocaleString('sv-SE').replace(' ', 'T'), end.toLocaleString('sv-SE').replace(' ', 'T'), hours, malaysiaTime()]);
   res.redirect('/dashboard');
 });
 
 app.post('/update-status/:id', checkAuth, async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
   const { status, reason } = req.body;
-  await run('UPDATE duties SET status = ?, reason = ?, action_at = CURRENT_TIMESTAMP WHERE id = ?', [status, reason || null, req.params.id]);
+  await run('UPDATE duties SET status = ?, reason = ?, action_at = ? WHERE id = ?', [status, reason || null, malaysiaTime(), req.params.id]);
   const duty = (await query('SELECT * FROM duties WHERE id = ?', [req.params.id]))[0];
   if (duty) {
     const today = new Date().toLocaleDateString('en-MY');
@@ -133,28 +138,21 @@ app.get('/admin/student/:nd', checkAuth, async (req, res) => {
 
 app.get('/admin/slides', checkAuth, async (req, res) => { if (req.user.role !== 'admin') return res.redirect('/dashboard'); const slides = await query('SELECT * FROM slides ORDER BY id'); res.render('admin-slides', { user: req.user, slides }); });
 
-app.post('/api/slides/add', checkAuth, upload.single('image'), async (req, res) => {
-  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
-  if (!req.file) return res.status(400).json({ error: 'No image uploaded' });
-  const image_url = '/uploads/' + req.file.filename;
-  await run('INSERT INTO slides (image_url, title) VALUES (?, ?)', [image_url, req.body.title || '']);
-  res.json({ success: true });
-});
-
+app.post('/api/slides/add', checkAuth, upload.single('image'), async (req, res) => { if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' }); if (!req.file) return res.status(400).json({ error: 'No image uploaded' }); await run('INSERT INTO slides (image_url, title) VALUES (?, ?)', ['/uploads/' + req.file.filename, req.body.title || '']); res.json({ success: true }); });
 app.post('/api/slides/delete/:id', checkAuth, async (req, res) => { if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' }); await run('DELETE FROM slides WHERE id = ?', [req.params.id]); res.json({ success: true }); });
 
-app.post('/delete-duty/:id', checkAuth, async (req, res) => { if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' }); await run('UPDATE duties SET action_at = CURRENT_TIMESTAMP WHERE id = ?', [req.params.id]); await run('DELETE FROM duties WHERE id = ?', [req.params.id]); res.json({ success: true }); });
+app.post('/delete-duty/:id', checkAuth, async (req, res) => { if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' }); await run('UPDATE duties SET action_at = ? WHERE id = ?', [malaysiaTime(), req.params.id]); await run('DELETE FROM duties WHERE id = ?', [req.params.id]); res.json({ success: true }); });
 
 app.post('/bulk-action', checkAuth, async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
   const { ids, status } = req.body;
-  try { for (const id of ids) { await run('UPDATE duties SET status = ?, action_at = CURRENT_TIMESTAMP WHERE id = ?', [status, id]); const duty = (await query('SELECT * FROM duties WHERE id = ?', [id]))[0]; if (duty) { const today = new Date().toLocaleDateString('en-MY'); const msg = status === 'approved' ? `[${today}] Your duty "${duty.event_name}" has been approved. Hours recorded: ${duty.hours.toFixed(1)} hrs.` : `[${today}] Your duty "${duty.event_name}" was reviewed and requires revision. Reason: Bulk action.`; await run('INSERT INTO notifications (nombor_daftar, message) VALUES (?, ?)', [duty.nombor_daftar, msg]); } } res.json({ success: true }); } catch(e) { res.status(500).json({ error: e.message }); }
+  try { for (const id of ids) { await run('UPDATE duties SET status = ?, action_at = ? WHERE id = ?', [status, malaysiaTime(), id]); const duty = (await query('SELECT * FROM duties WHERE id = ?', [id]))[0]; if (duty) { const today = new Date().toLocaleDateString('en-MY'); const msg = status === 'approved' ? `[${today}] Your duty "${duty.event_name}" has been approved. Hours recorded: ${duty.hours.toFixed(1)} hrs.` : `[${today}] Your duty "${duty.event_name}" was reviewed and requires revision. Reason: Bulk action.`; await run('INSERT INTO notifications (nombor_daftar, message) VALUES (?, ?)', [duty.nombor_daftar, msg]); } } res.json({ success: true }); } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/bulk-delete', checkAuth, async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
   const { ids } = req.body;
-  try { for (const id of ids) { await run('UPDATE duties SET action_at = CURRENT_TIMESTAMP WHERE id = ?', [id]); await run('DELETE FROM duties WHERE id = ?', [id]); } res.json({ success: true }); } catch(e) { res.status(500).json({ error: e.message }); }
+  try { for (const id of ids) { await run('UPDATE duties SET action_at = ? WHERE id = ?', [malaysiaTime(), id]); await run('DELETE FROM duties WHERE id = ?', [id]); } res.json({ success: true }); } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 app.get('/health', (req, res) => res.send('OK'));
