@@ -59,8 +59,9 @@
         .badge { padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; }
         .badge-success { background: #d4edda; color: #155724; } .badge-warning { background: #fff3cd; color: #856404; } .badge-danger { background: #f8d7da; color: #721c24; }
         .hour-badge { background: #e8f4f8; color: #31708f; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 12px; }
-        .btn-sm { padding: 6px 12px; border-radius: 15px; border: none; cursor: pointer; font-size: 11px; font-weight: 600; color: white; margin: 2px; }
+        .btn-sm { padding: 6px 12px !important; border-radius: 15px !important; border: none !important; cursor: pointer; font-size: 11px; font-weight: 600; color: white; margin: 2px; }
         .btn-edit { background: #f39c12; }
+        .btn-delete-duty { background: #e74c3c; }
         .year-filter { margin-bottom: 15px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
         .year-filter span { font-weight: 600; color: #5a3921; font-size: 13px; }
         .year-filter a { padding: 5px 12px; border-radius: 15px; text-decoration: none; font-size: 12px; font-weight: 600; background: white; color: #5a3921; border: 1px solid #ddd; }
@@ -153,7 +154,10 @@
                             <td><span class="hour-badge"><%=(duty.hours||0).toFixed(1)%> hrs</span></td>
                             <td><%if(duty.status==='approved'){%><span class="badge badge-success">Approved</span><%}else if(duty.status==='rejected'){%><span class="badge badge-danger">Rejected</span><%}else{%><span class="badge badge-warning">Pending</span><%}%></td>
                             <td>
-                                <% if(duty.status==='pending'){%><button class="btn-sm btn-edit" onclick="editDuty('<%=duty.id%>','<%=duty.event_name.replace(/'/g,"\\'")%>','<%=duty.start_time%>','<%=duty.end_time%>')">Edit</button><%}%>
+                                <% if(duty.status==='pending'){%>
+                                    <button class="btn-sm btn-edit" onclick="editDuty('<%=duty.id%>','<%=duty.event_name.replace(/'/g,"\\'")%>','<%=duty.start_time%>','<%=duty.end_time%>')">Edit</button>
+                                    <button class="btn-sm btn-delete-duty" onclick="deleteMyDuty('<%=duty.id%>')">Delete</button>
+                                <%}%>
                             </td>
                         </tr>
                         <%});%>
@@ -215,19 +219,24 @@
         .then(function(r){return r.json();}).then(function(d){if(d.success)location.reload();});
     }
 
+    function deleteMyDuty(id){
+        if(confirm('Delete this record?')){
+            fetch('/delete-duty/'+id, {method:'POST'})
+            .then(function(r){return r.json();})
+            .then(function(d){ if(d.success) location.reload(); });
+        }
+    }
+
     function clearNotifications(){if(confirm('Clear all?')){fetch('/notifications/clear',{method:'POST'}).then(function(r){return r.json();}).then(function(d){if(d.success)location.reload();});}}
     var cs=0,slides=document.querySelectorAll('#slideshow img'),dots=document.querySelectorAll('.slideshow-dots span');
     if(slides.length>0){window.showSlide=function(n){slides[cs].classList.remove('active');if(dots.length>0)dots[cs].classList.remove('active');cs=n;slides[cs].classList.add('active');if(dots.length>0)dots[cs].classList.add('active');};if(slides.length>1)setInterval(function(){showSlide((cs+1)%slides.length);},3000);}
     fetch('/notifications/read',{method:'POST'});
 
-    // Auto-refresh notifications every 30 seconds
     setInterval(function() {
         fetch('/notifications/poll')
         .then(function(r) { return r.json(); })
         .then(function(d) {
             if (d.unread > 0) {
-                // Reload notification panel silently by fetching dashboard again
-                // Or just show a subtle indicator
                 var bell = document.querySelector('.notification-panel h4');
                 if (bell && !bell.textContent.includes('●')) {
                     bell.innerHTML = bell.innerHTML.replace('Notifications', '● Notifications');
