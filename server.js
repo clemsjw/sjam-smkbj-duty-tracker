@@ -34,13 +34,7 @@ function malaysiaTime() {
   const now = new Date();
   const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
   const myt = new Date(utc + (8 * 3600000));
-  const y = myt.getFullYear();
-  const m = String(myt.getMonth() + 1).padStart(2, '0');
-  const d = String(myt.getDate()).padStart(2, '0');
-  const h = String(myt.getHours()).padStart(2, '0');
-  const min = String(myt.getMinutes()).padStart(2, '0');
-  const s = String(myt.getSeconds()).padStart(2, '0');
-  return `${y}-${m}-${d} ${h}:${min}:${s}`;
+  return `${myt.getFullYear()}-${String(myt.getMonth()+1).padStart(2,'0')}-${String(myt.getDate()).padStart(2,'0')} ${String(myt.getHours()).padStart(2,'0')}:${String(myt.getMinutes()).padStart(2,'0')}:${String(myt.getSeconds()).padStart(2,'0')}`;
 }
 
 app.set('view engine', 'ejs');
@@ -149,7 +143,14 @@ app.get('/admin/slides', checkAuth, async (req, res) => { if (req.user.role !== 
 app.post('/api/slides/add', checkAuth, upload.single('image'), async (req, res) => { if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' }); if (!req.file) return res.status(400).json({ error: 'No image uploaded' }); await run('INSERT INTO slides (image_url, title) VALUES (?, ?)', ['/uploads/' + req.file.filename, req.body.title || '']); res.json({ success: true }); });
 app.post('/api/slides/delete/:id', checkAuth, async (req, res) => { if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' }); await run('DELETE FROM slides WHERE id = ?', [req.params.id]); res.json({ success: true }); });
 
-app.post('/delete-duty/:id', checkAuth, async (req, res) => { if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' }); await run('UPDATE duties SET action_at = ? WHERE id = ?', [malaysiaTime(), req.params.id]); await run('DELETE FROM duties WHERE id = ?', [req.params.id]); res.json({ success: true }); });
+app.post('/delete-duty/:id', checkAuth, async (req, res) => {
+  const duty = (await query('SELECT * FROM duties WHERE id = ?', [req.params.id]))[0];
+  if (!duty) return res.status(404).json({ error: 'Not found' });
+  if (req.user.role !== 'admin' && duty.nombor_daftar !== req.user.nombor_daftar) return res.status(403).json({ error: 'Unauthorized' });
+  await run('UPDATE duties SET action_at = ? WHERE id = ?', [malaysiaTime(), req.params.id]);
+  await run('DELETE FROM duties WHERE id = ?', [req.params.id]);
+  res.json({ success: true });
+});
 
 app.post('/bulk-action', checkAuth, async (req, res) => {
   if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
